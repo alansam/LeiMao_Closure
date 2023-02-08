@@ -4,6 +4,7 @@
 //  @see  https://unlicense.org
 
 //  @see:  https://leimao.github.io/blog/CPP-Closure/
+//  @see:  https://leimao.github.io/blog/CPP-Lambda-Expression/
 
 #include <iostream>
 #include <iomanip>
@@ -11,7 +12,8 @@
 #include <functional>
 #include <cmath>
 
-int mainix(void);
+void lambdaix(void);
+void lambda2(void);
 
 std::function<void(void)> closureWrapper1() {
   int x = 10;
@@ -85,13 +87,17 @@ int main(int argc, char const * argv[]) {
   std::cout.put('\n');
 
   std::cout << std::string(40, '=') << std::endl;
+  lambdaix();
+  std::cout.put('\n');
 
-  mainix();
+  std::cout << std::string(40, '=') << std::endl;
+  lambda2();
+  std::cout.put('\n');
 
   return 0;
 }
 
-int mainix() {
+void lambdaix() {
 #define CXPR_
 #ifdef CXPR_
   constexpr
@@ -111,5 +117,68 @@ int mainix() {
   double area = circleArea(rx);
   std::cout << area << std::endl;
 
-  return 0;
+  return;
+}
+
+void lambda2() {
+  double rate = 0.01;
+  
+  // Capture by reference
+  auto f0 = [&rate]() {
+    rate *= 2;
+  };
+
+  // Capture variables in the function body by reference by default
+  auto f1 = [&]() {
+    rate *= 2;
+  };
+
+  // Capture by const value
+  auto f2 = [rate](double x) {
+    return (1 + rate) * x;
+  };
+
+  // Specify return type
+  auto f3 = [rate](double x) -> double {
+    return (1 + rate) * x;
+  };
+  auto f4 = [rate](double x) -> int {
+    return (1 + rate) * x;
+  };
+
+  // Compile time polymorphism
+  // C++14 features
+  auto f5 = [](auto x) {
+    return 2 * x;
+  };
+  auto f6 = []<typename T>(T x) {
+    return 2 * x;
+  };
+  auto f7 = []<typename T>(T x) -> T {
+    return 2 * x;
+  };
+
+  // Capture by mutable value
+  // This causes error because rate is immutable
+  // auto f8 = [rate](double x){rate += 1.0;};
+  // Rate is now mutable
+  // But the mutation would not change the value outside the lambda expression scope
+  auto f8 = [rate]() mutable {
+    rate += 1.0; return rate;
+  };
+
+  f0();
+  std::cout << rate << std::endl;
+  f1();
+  std::cout << rate << std::endl;
+  std::cout << "f2: " << f2(10) << std::endl;
+  std::cout << "f3: " << f3(10) << std::endl;
+  std::cout << "f4: " << f4(10) << std::endl;
+  std::cout << "f5: " << f5(15) << std::endl;
+  std::cout << "f6: " << f6(16) << std::endl;
+  std::cout << "f7: " << f7(17) << std::endl;
+  std::cout << "f8: " << f8() << std::endl;
+  std::cout << rate << std::endl;
+
+  return;
 }
